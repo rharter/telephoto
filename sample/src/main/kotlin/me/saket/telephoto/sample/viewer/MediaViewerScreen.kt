@@ -6,12 +6,14 @@ import androidx.compose.animation.core.SnapSpec
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CropFree
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -26,13 +28,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import coil.request.ImageRequest
 import kotlinx.coroutines.delay
 import me.saket.telephoto.flick.FlickToDismiss
@@ -56,6 +61,8 @@ internal fun MediaViewerScreen(key: MediaViewerScreenKey) {
       initialPage = key.initialIndex,
       pageCount = { key.album.items.size },
     )
+    var padded by remember { mutableStateOf(false) }
+
     HorizontalPager(
       modifier = Modifier
         .padding(contentPadding)
@@ -64,7 +71,10 @@ internal fun MediaViewerScreen(key: MediaViewerScreenKey) {
       beyondBoundsPageCount = 1,
     ) { pageNum ->
       MediaPage(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+          .fillMaxSize()
+          .padding(top = if (padded) 150.dp else 0.dp)
+          .background(Color.Red.copy(alpha = 0.1f)),
         model = key.album.items[pageNum],
         isActivePage = pagerState.settledPage == pageNum,
       )
@@ -72,7 +82,13 @@ internal fun MediaViewerScreen(key: MediaViewerScreenKey) {
 
     TopAppBar(
       title = {},
-      navigationIcon = { CloseNavIconButton() },
+      navigationIcon = {
+        IconButton(
+          onClick = { padded = !padded },
+        ) {
+          Icon(Icons.Default.CropFree, contentDescription = "Toggle padding")
+        }
+      },
       colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
     )
   }
